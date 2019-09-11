@@ -11,7 +11,7 @@ script:
 env:
   global:
     - CC_TEST_REPORTER_ID=d76ba4c626b2883e010d5df0bdf24b22cce0dd4518a9f7f00b092a7fedb5d756
-language: ruby
+language: javasctipt
 rvm:
   - 2.2.0
 before_script:
