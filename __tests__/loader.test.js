@@ -25,3 +25,18 @@ test('Work', async (done) => {
   expect(newFileContent).toBe(testFileContent);
   done();
 });
+
+test('Work on main page', async (done) => {
+  const tmpDirectory = await fs.mkdtemp(path.join(tmpdir(), 'pl-'));
+  const testFilePath = '__tests__/__fixtures__/file.html';
+  const testFileContent = await fs.readFile(testFilePath, 'utf-8');
+
+  nock(host)
+    .get('/')
+    .reply(200, testFileContent);
+
+  await loader(`${host}`, tmpDirectory);
+  const newFileContent = await fs.readFile(path.join(tmpDirectory, 'localhost.html'), 'utf-8');
+  expect(newFileContent).toBe(testFileContent);
+  done();
+});
