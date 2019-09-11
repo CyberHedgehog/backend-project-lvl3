@@ -11,32 +11,32 @@ const host = 'http://localhost';
 axios.defaults.host = host;
 axios.defaults.adapter = httpAdapter;
 
-test('Work', async (done) => {
-  const tmpDirectory = await fs.mkdtemp(path.join(tmpdir(), 'pl-'));
-  const testFilePath = '__tests__/__fixtures__/file.html';
-  const testFileContent = await fs.readFile(testFilePath, 'utf-8');
+const vars = {};
 
+beforeEach(async () => {
+  vars.tmpDirectory = await fs.mkdtemp(path.join(tmpdir(), 'pl-'));
+  vars.testFilePath = '__tests__/__fixtures__/file.html';
+  vars.testFileContent = await fs.readFile(vars.testFilePath, 'utf-8');
+});
+
+test('Work', async (done) => {
   nock(host)
     .get('/page')
-    .reply(200, testFileContent);
+    .reply(200, vars.testFileContent);
 
-  await loader(`${host}/page`, tmpDirectory);
-  const newFileContent = await fs.readFile(path.join(tmpDirectory, 'localhost-page.html'), 'utf-8');
-  expect(newFileContent).toBe(testFileContent);
+  await loader(`${host}/page`, vars.tmpDirectory);
+  const newFileContent = await fs.readFile(path.join(vars.tmpDirectory, 'localhost-page.html'), 'utf-8');
+  expect(newFileContent).toBe(vars.testFileContent);
   done();
 });
 
 test('Work on main page', async (done) => {
-  const tmpDirectory = await fs.mkdtemp(path.join(tmpdir(), 'pl-'));
-  const testFilePath = '__tests__/__fixtures__/file.html';
-  const testFileContent = await fs.readFile(testFilePath, 'utf-8');
-
   nock(host)
     .get('/')
-    .reply(200, testFileContent);
+    .reply(200, vars.testFileContent);
 
-  await loader(`${host}`, tmpDirectory);
-  const newFileContent = await fs.readFile(path.join(tmpDirectory, 'localhost.html'), 'utf-8');
-  expect(newFileContent).toBe(testFileContent);
+  await loader(`${host}`, vars.tmpDirectory);
+  const newFileContent = await fs.readFile(path.join(vars.tmpDirectory, 'localhost.html'), 'utf-8');
+  expect(newFileContent).toBe(vars.testFileContent);
   done();
 });
