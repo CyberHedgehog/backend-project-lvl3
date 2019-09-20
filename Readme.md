@@ -11,3 +11,5 @@ Type `page-loader -o derectory link` to download page
 
 
 [![asciicast](https://asciinema.org/a/S1uPQEvlhz6gSWE80bjRypiy5.svg)](https://asciinema.org/a/S1uPQEvlhz6gSWE80bjRypiy5)
+
+[![asciicast](https://asciinema.org/a/eyQohjV7xZ606AJ3KbMwwpmkJ.svg)](https://asciinema.org/a/eyQohjV7xZ606AJ3KbMwwpmkJ)
