@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest --coverage",
     "build": "NODE_ENV=production babel src --out-dir dist --source-maps inline",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "debug": "DEBUG=page-loader npx babel-node src/bin/index.js"
   },
   "files": [
     "dist"
@@ -45,6 +46,7 @@
     "axios": "^0.19.0",
     "cheerio": "^1.0.0-rc.3",
     "commander": "^3.0.1",
+    "debug": "^4.1.1",
     "fs": "0.0.1-security",
     "os": "^0.1.1",
     "path": "^0.12.7"

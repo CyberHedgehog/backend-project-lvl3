@@ -35,3 +35,12 @@ test('Donwload files', async (done) => {
   expect(tmpFilesList).toContain('files-logo.png');
   done();
 });
+
+test('Has links', async (done) => {
+  const tmpDirectory = await fs.mkdtemp(path.join(tmpdir(), 'pl-'));
+  await loader(host, tmpDirectory);
+  const downloadedPagePath = path.join(tmpDirectory, 'localhost.html');
+  const pageData = await fs.readFile(downloadedPagePath, 'utf-8');
+  expect(pageData.includes('localhost_files/files-logo.png')).toBeTruthy();
+  done();
+});
