@@ -9,6 +9,9 @@
     "prepublishOnly": "npm run build",
     "debug": "DEBUG=page-loader npx babel-node src/bin/index.js"
   },
+  "jest": {
+    "testEnvironment": "node"
+  },
   "files": [
     "dist"
   ],

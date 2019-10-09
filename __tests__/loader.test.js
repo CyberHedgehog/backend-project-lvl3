@@ -25,7 +25,14 @@ beforeEach(async () => {
     .get('/files/style.css')
     .reply(200, await fs.readFile(`${testFilesDir}/style.css`))
     .get('/files/script.scr')
-    .reply(200, await fs.readFile(`${testFilesDir}/script.scr`));
+    .reply(200, await fs.readFile(`${testFilesDir}/script.scr`))
+    .get('/epage')
+    .replyWithError({
+      code: 'ENOTFOUND',
+      message: 'Not found',
+    })
+    .get('/nf')
+    .reply(404);
 });
 
 test('Donwload files', async (done) => {
@@ -44,3 +51,9 @@ test('Has links', async (done) => {
   expect(pageData.includes('localhost_files/files-logo.png')).toBeTruthy();
   done();
 });
+
+test('EACCES', () => expect(loader(host, '/')).rejects.toThrow('EACCES'));
+
+test('ENOTFOUND', () => expect(loader(`${host}/epage`, '/')).rejects.toThrow('ENOTFOUND'));
+
+test('404', () => expect(loader(`${host}/nf`, '/')).rejects.toThrow('404'));

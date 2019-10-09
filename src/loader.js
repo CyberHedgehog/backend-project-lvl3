@@ -40,7 +40,19 @@ const makePromise = (filesDir, link, tag) => {
 const loadPage = (srcLink, outDir) => {
   log(`Downloading page: ${srcLink}`);
   return axios.get(srcLink)
+    .catch((err) => {
+      const { response } = err;
+      process.exitCode = 1;
+      if (!response) {
+        throw (new Error(err.code));
+      }
+      throw (new Error(response.status));
+    })
     .then((res) => {
+      if (res.status !== 200) {
+        process.exitCode = 1;
+        throw (new Error(res.statusText));
+      }
       const dom = cheerio.load(res.data);
       const pageName = urlToName(srcLink);
       const pagePath = path.join(outDir, `${pageName}.html`);
@@ -55,10 +67,13 @@ const loadPage = (srcLink, outDir) => {
           promisesList.push(newPromise);
         });
       return fs.mkdir(filesDirPath)
+        .catch((err) => {
+          process.exitCode = 1;
+          throw (new Error(err.code));
+        })
         .then(() => Promise.all(promisesList)
           .then(() => fs.writeFile(pagePath, dom.html())));
-    })
-    .catch((err) => log(`Error! ${err}`));
+    });
 };
 
 export default loadPage;
