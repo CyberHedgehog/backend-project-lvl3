@@ -25,10 +25,14 @@ const tasks = new Listr([
     title: `Downloading ${link}`,
     task: () => loadPage(link, outPath)
       .catch((err) => {
+        process.exitCode = 1;
         const { message } = err;
         throw new Error(errorMessages[message]);
       }),
   },
 ]);
 
-tasks.run().catch((err) => err);
+tasks.run().catch((err) => {
+  console.log(process);
+  return err;
+});

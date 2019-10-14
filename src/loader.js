@@ -42,7 +42,6 @@ const loadPage = (srcLink, outDir) => {
   return axios.get(srcLink)
     .catch((err) => {
       const { response } = err;
-      process.exitCode = 1;
       if (!response) {
         throw (new Error(err.code));
       }
@@ -50,7 +49,6 @@ const loadPage = (srcLink, outDir) => {
     })
     .then((res) => {
       if (res.status !== 200) {
-        process.exitCode = 1;
         throw (new Error(res.statusText));
       }
       const dom = cheerio.load(res.data);
@@ -68,7 +66,6 @@ const loadPage = (srcLink, outDir) => {
         });
       return fs.mkdir(filesDirPath)
         .catch((err) => {
-          process.exitCode = 1;
           throw (new Error(err.code));
         })
         .then(() => Promise.all(promisesList)
