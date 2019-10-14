@@ -7,7 +7,7 @@
 
 
 ## Downloading webpages  
-Type `page-loader -o derectory link` to download page
+Type `page-loader -o <directory> <link>` to download page
 
 
 [![asciicast](https://asciinema.org/a/S1uPQEvlhz6gSWE80bjRypiy5.svg)](https://asciinema.org/a/S1uPQEvlhz6gSWE80bjRypiy5)
