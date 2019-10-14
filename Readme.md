@@ -25,3 +25,9 @@ Type `DEBUG=page-loader page-loader -o <directory> <link>` to print debug inform
 
 
 [![asciicast](https://asciinema.org/a/qVJ9O0Mx3xE0q3XYgbcgCCtPg.svg)](https://asciinema.org/a/qVJ9O0Mx3xE0q3XYgbcgCCtPg)
+
+
+## Display progress
+
+
+[![asciicast](https://asciinema.org/a/4aOvGPA8olCCe8rIDx8EUoJva.svg)](https://asciinema.org/a/4aOvGPA8olCCe8rIDx8EUoJva)

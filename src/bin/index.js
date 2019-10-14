@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import program from 'commander';
+import Listr from 'listr';
 import loadPage from '../loader';
 
 program
@@ -11,19 +12,23 @@ program
 
 const { args } = program;
 const [outPath, link] = program.output ? args : ['./', args[0]];
-const errors = {
-  ENOENT: 'Error: no such file or directory',
-  EACCES: 'Error: permission denied',
-  ENOTFOUND: 'Error: page not found',
-  404: 'Error: page not found',
+const errorMessages = {
+  ENOENT: 'No such file or directory',
+  EACCES: 'Permission denied',
+  ENOTFOUND: 'Page not found',
+  404: 'Page not found',
+  EEXIST: 'Output directory already exists',
 };
 
-loadPage(link, outPath)
-  .catch((err) => {
-    const { message } = err;
-    if (errors[message]) {
-      console.error(errors[message]);
-      return;
-    }
-    console.error(message);
-  });
+const tasks = new Listr([
+  {
+    title: `Downloading ${link}`,
+    task: () => loadPage(link, outPath)
+      .catch((err) => {
+        const { message } = err;
+        throw new Error(errorMessages[message]);
+      }),
+  },
+]);
+
+tasks.run().catch((err) => err);
