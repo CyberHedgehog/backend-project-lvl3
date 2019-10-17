@@ -7,7 +7,7 @@ import debug from 'debug';
 
 const log = debug('page-loader');
 
-const urlToName = (link) => {
+const getName = (link) => {
   const parsedLink = url.parse(link);
   const linkPath = parsedLink.path === '/' ? '' : parsedLink.path;
   const { host } = parsedLink;
@@ -52,7 +52,7 @@ const loadPage = (srcLink, outDir) => {
         throw (new Error(res.statusText));
       }
       const dom = cheerio.load(res.data);
-      const pageName = urlToName(srcLink);
+      const pageName = getName(srcLink);
       const pagePath = path.join(outDir, `${pageName}.html`);
       const filesDirPath = path.join(outDir, `${pageName}_files`);
       const tags = dom('img, link, script');

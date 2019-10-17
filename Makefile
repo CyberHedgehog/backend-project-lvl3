@@ -1,17 +1,17 @@
 install:
-				npm install
+	npm install
 
 start:
-				npx babel-node src/bin/index.js
+	npx babel-node src/bin/index.js
 
 publish:
-				npm publish --dry-run
+	npm publish --dry-run
 
 lint:
-				npx eslint .
+	npx eslint .
 
 test:
-				npm test
+	npm test
 
 watch:
-				npx jest --watch
+	npx jest --watch
