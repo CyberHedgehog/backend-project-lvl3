@@ -36,7 +36,7 @@ const downloadFile = (filesDir, link, tag) => {
     .then((res) => fs.writeFile(filePath, res.data));
 };
 
-const makeDownloadsList = (dom, link, destDir) => {
+const downloadFiles = (dom, link, destDir) => {
   const tags = dom(Object.keys(tagsList).join(','));
   const promisesList = [];
   log('Creating promises list');
@@ -46,7 +46,7 @@ const makeDownloadsList = (dom, link, destDir) => {
       const newPromise = downloadFile(destDir, link, el);
       promisesList.push(newPromise);
     });
-  return promisesList;
+  return Promise.all(promisesList);
 };
 
 const loadPage = (srcLink, outDir) => {
@@ -70,10 +70,7 @@ const loadPage = (srcLink, outDir) => {
           throw (new Error(err.code));
         });
     })
-    .then(() => {
-      const downloadsList = makeDownloadsList(dom, srcLink, filesDirPath);
-      return Promise.all(downloadsList);
-    })
+    .then(() => downloadFiles(dom, srcLink, filesDirPath))
     .then(() => fs.writeFile(pagePath, dom.html()));
 };
 
