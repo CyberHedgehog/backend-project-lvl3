@@ -12,7 +12,7 @@ const getName = (link) => {
   const linkPath = parsedLink.path === '/' ? '' : parsedLink.path;
   const { host } = parsedLink;
   const fileName = `${host}${linkPath}`.replace(/\W/g, '-');
-  return `${fileName}`;
+  return fileName;
 };
 
 const tagsList = {
@@ -21,7 +21,7 @@ const tagsList = {
   link: 'href',
 };
 
-const makePromise = (filesDir, link, tag) => {
+const downloadFile = (filesDir, link, tag) => {
   const { name, attribs } = tag;
   const tagLink = attribs[tagsList[name]];
   const fileName = tagLink.replace(/\//g, '-');
@@ -33,11 +33,27 @@ const makePromise = (filesDir, link, tag) => {
   return axios.get(downloadLink, {
     responseType: 'arraybuffer',
   })
-    .then((res) => fs.writeFile(filePath, res.data))
-    .catch((err) => log(`Error! ${err}`));
+    .then((res) => fs.writeFile(filePath, res.data));
+};
+
+const makeDownloadsList = (dom, link, destDir) => {
+  const tags = dom(Object.keys(tagsList).join(','));
+  const promisesList = [];
+  log('Creating promises list');
+  tags
+    .filter((i, el) => el.attribs[tagsList[el.name]])
+    .each((i, el) => {
+      const newPromise = downloadFile(destDir, link, el);
+      promisesList.push(newPromise);
+    });
+  return promisesList;
 };
 
 const loadPage = (srcLink, outDir) => {
+  let dom;
+  const pageName = getName(srcLink);
+  const pagePath = path.join(outDir, `${pageName}.html`);
+  const filesDirPath = path.join(outDir, `${pageName}_files`);
   log(`Downloading page: ${srcLink}`);
   return axios.get(srcLink)
     .catch((err) => {
@@ -48,29 +64,17 @@ const loadPage = (srcLink, outDir) => {
       throw (new Error(response.status));
     })
     .then((res) => {
-      if (res.status !== 200) {
-        throw (new Error(res.statusText));
-      }
-      const dom = cheerio.load(res.data);
-      const pageName = getName(srcLink);
-      const pagePath = path.join(outDir, `${pageName}.html`);
-      const filesDirPath = path.join(outDir, `${pageName}_files`);
-      const tags = dom('img, link, script');
-      const promisesList = [];
-      log('Creating promises list');
-      tags
-        .filter((i, el) => el.attribs[tagsList[el.name]])
-        .each((i, el) => {
-          const newPromise = makePromise(filesDirPath, srcLink, el);
-          promisesList.push(newPromise);
-        });
+      dom = cheerio.load(res.data);
       return fs.mkdir(filesDirPath)
         .catch((err) => {
           throw (new Error(err.code));
-        })
-        .then(() => Promise.all(promisesList)
-          .then(() => fs.writeFile(pagePath, dom.html())));
-    });
+        });
+    })
+    .then(() => {
+      const downloadsList = makeDownloadsList(dom, srcLink, filesDirPath);
+      return Promise.all(downloadsList);
+    })
+    .then(() => fs.writeFile(pagePath, dom.html()));
 };
 
 export default loadPage;
