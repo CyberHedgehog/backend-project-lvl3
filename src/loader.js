@@ -7,7 +7,7 @@ import debug from 'debug';
 
 const log = debug('page-loader');
 
-const getName = (link) => {
+const getFileName = (link) => {
   const parsedLink = url.parse(link);
   const linkPath = parsedLink.path === '/' ? '' : parsedLink.path;
   const { host } = parsedLink;
@@ -21,19 +21,12 @@ const tagsList = {
   link: 'href',
 };
 
-const downloadFile = (filesDir, link, tag) => {
-  const { name, attribs } = tag;
-  const tagLink = attribs[tagsList[name]];
-  const fileName = tagLink.replace(/\//g, '-');
-  const downloadLink = url.resolve(link, tagLink);
-  const filePath = path.join(filesDir, fileName);
-  const newTagLink = path.join(path.parse(filesDir).base, fileName);
-  attribs[tagsList[name]] = newTagLink;
+const downloadFile = (downloadPath, downloadLink) => {
   log(`Downloading file: ${downloadLink}`);
   return axios.get(downloadLink, {
     responseType: 'arraybuffer',
   })
-    .then((res) => fs.writeFile(filePath, res.data));
+    .then((res) => fs.writeFile(downloadPath, res.data));
 };
 
 const downloadFiles = (dom, link, destDir) => {
@@ -43,7 +36,13 @@ const downloadFiles = (dom, link, destDir) => {
   tags
     .filter((i, el) => el.attribs[tagsList[el.name]])
     .each((i, el) => {
-      const newPromise = downloadFile(destDir, link, el);
+      const { name, attribs } = el;
+      const fileLink = attribs[tagsList[name]];
+      const fileName = fileLink.replace(/\//g, '-');
+      const downloadLink = url.resolve(link, fileLink);
+      const filePath = path.join(destDir, fileName);
+      const newPromise = downloadFile(filePath, downloadLink);
+      attribs[tagsList[name]] = path.join(path.parse(destDir).base, fileName);
       promisesList.push(newPromise);
     });
   return Promise.all(promisesList);
@@ -51,7 +50,7 @@ const downloadFiles = (dom, link, destDir) => {
 
 const loadPage = (srcLink, outDir) => {
   let dom;
-  const pageName = getName(srcLink);
+  const pageName = getFileName(srcLink);
   const pagePath = path.join(outDir, `${pageName}.html`);
   const filesDirPath = path.join(outDir, `${pageName}_files`);
   log(`Downloading page: ${srcLink}`);
