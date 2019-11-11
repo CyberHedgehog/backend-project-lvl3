@@ -29,10 +29,10 @@ const downloadFile = (downloadPath, downloadLink) => {
     .then((res) => fs.writeFile(downloadPath, res.data));
 };
 
-const downloadFiles = (dom, link, destDir) => {
+const getDownloadsList = (dom, link, destDir) => {
   const tags = dom(Object.keys(tagsList).join(','));
-  const promisesList = [];
-  log('Creating promises list');
+  const downloadsList = [];
+  log('Creating downloads list');
   tags
     .filter((i, el) => el.attribs[tagsList[el.name]])
     .each((i, el) => {
@@ -41,10 +41,17 @@ const downloadFiles = (dom, link, destDir) => {
       const fileName = fileLink.replace(/\//g, '-');
       const downloadLink = url.resolve(link, fileLink);
       const filePath = path.join(destDir, fileName);
-      const newPromise = downloadFile(filePath, downloadLink);
       attribs[tagsList[name]] = path.join(path.parse(destDir).base, fileName);
-      promisesList.push(newPromise);
+      downloadsList.push({ downloadLink, filePath });
     });
+  return downloadsList;
+};
+
+const downloadFiles = (downloadsList) => {
+  const promisesList = downloadsList.map((elem) => {
+    const { downloadLink, filePath } = elem;
+    return downloadFile(filePath, downloadLink);
+  });
   return Promise.all(promisesList);
 };
 
@@ -69,7 +76,10 @@ const loadPage = (srcLink, outDir) => {
           throw (new Error(err.code));
         });
     })
-    .then(() => downloadFiles(dom, srcLink, filesDirPath))
+    .then(() => {
+      const downloadsList = getDownloadsList(dom, srcLink, filesDirPath);
+      return downloadFiles(downloadsList);
+    })
     .then(() => fs.writeFile(pagePath, dom.html()));
 };
 
