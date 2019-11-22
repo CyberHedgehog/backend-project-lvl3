@@ -21,12 +21,12 @@ const tagsList = {
   link: 'href',
 };
 
-const downloadFile = (downloadPath, downloadLink) => {
+const downloadFile = async (downloadPath, downloadLink) => {
   log(`Downloading file: ${downloadLink}`);
-  return axios.get(downloadLink, {
+  const response = await axios.get(downloadLink, {
     responseType: 'arraybuffer',
-  })
-    .then((res) => fs.writeFile(downloadPath, res.data));
+  });
+  await fs.writeFile(downloadPath, response.data);
 };
 
 const getDownloadsList = (dom, link, destDir) => {
@@ -55,32 +55,27 @@ const downloadFiles = (downloadsList) => {
   return Promise.all(promisesList);
 };
 
-const loadPage = (srcLink, outDir) => {
-  let dom;
+const loadPage = async (srcLink, outDir) => {
   const pageName = getFileName(srcLink);
   const pagePath = path.join(outDir, `${pageName}.html`);
   const filesDirPath = path.join(outDir, `${pageName}_files`);
   log(`Downloading page: ${srcLink}`);
-  return axios.get(srcLink)
+  const res = await axios.get(srcLink)
     .catch((err) => {
       const { response } = err;
       if (!response) {
         throw (new Error(err.code));
       }
       throw (new Error(response.status));
-    })
-    .then((res) => {
-      dom = cheerio.load(res.data);
-      return fs.mkdir(filesDirPath)
-        .catch((err) => {
-          throw (new Error(err.code));
-        });
-    })
-    .then(() => {
-      const downloadsList = getDownloadsList(dom, srcLink, filesDirPath);
-      return downloadFiles(downloadsList);
-    })
-    .then(() => fs.writeFile(pagePath, dom.html()));
+    });
+  const dom = cheerio.load(res.data);
+  await fs.mkdir(filesDirPath)
+    .catch((err) => {
+      throw (new Error(err.code));
+    });
+  const downloadsList = getDownloadsList(dom, srcLink, filesDirPath);
+  await downloadFiles(downloadsList);
+  await fs.writeFile(pagePath, dom.html());
 };
 
 export default loadPage;
